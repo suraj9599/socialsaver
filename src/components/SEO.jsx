@@ -17,6 +17,31 @@ function updateMeta(attribute, key, content) {
   element.setAttribute("content", content);
 }
 
+function getHomepageSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        name: "SocialSaver",
+        url: `${SITE_URL}/`,
+        description:
+          "Free online tools for downloading Instagram and Facebook content.",
+        publisher: {
+          "@id": `${SITE_URL}/#organization`,
+        },
+      },
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "SocialSaver",
+        url: `${SITE_URL}/`,
+      },
+    ],
+  };
+}
+
 export default function SEO() {
   const { pathname } = useLocation();
 
@@ -27,6 +52,7 @@ export default function SEO() {
     document.title = seo.title;
 
     updateMeta("name", "description", seo.description);
+
     updateMeta(
       "name",
       "robots",
@@ -61,6 +87,27 @@ export default function SEO() {
     }
 
     canonicalLink.href = canonical;
+
+    // Add structured data only to the homepage.
+    const schemaId = "socialsaver-homepage-schema";
+    const isHomepage = seo.canonical === "/";
+
+    let schemaScript = document.getElementById(schemaId);
+
+    if (isHomepage) {
+      if (!schemaScript) {
+        schemaScript = document.createElement("script");
+        schemaScript.id = schemaId;
+        schemaScript.type = "application/ld+json";
+        document.head.appendChild(schemaScript);
+      }
+
+      schemaScript.textContent = JSON.stringify(
+        getHomepageSchema()
+      );
+    } else if (schemaScript) {
+      schemaScript.remove();
+    }
   }, [pathname]);
 
   return null;

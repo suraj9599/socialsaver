@@ -54,11 +54,46 @@ function escapeHTML(value) {
     .replaceAll(">", "&gt;");
 }
 
+
+function generateHomepageSchema() {
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://socialsaver.io/#website",
+        name: "SocialSaver",
+        url: "https://socialsaver.io/",
+        description:
+          "Free online tools for downloading Instagram and Facebook content.",
+        publisher: {
+          "@id": "https://socialsaver.io/#organization",
+        },
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://socialsaver.io/#organization",
+        name: "SocialSaver",
+        url: "https://socialsaver.io/",
+      },
+    ],
+  };
+
+  return `
+    <script
+      id="socialsaver-homepage-schema"
+      type="application/ld+json"
+    >${JSON.stringify(schema).replace(/</g, "\\u003c")}</script>
+  `;
+}
+
+
 function generateHead(route) {
   const canonical = `https://socialsaver.io${route.path}`;
   const title = escapeHTML(route.title);
   const description = escapeHTML(route.description);
   const url = escapeHTML(canonical);
+  const structuredData = route.path === "/" ? generateHomepageSchema() : "";
 
   return `
     <title>${title}</title>
@@ -72,6 +107,7 @@ function generateHead(route) {
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
+    ${structuredData}
   `;
 }
 
